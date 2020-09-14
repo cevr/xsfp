@@ -86,6 +86,147 @@ const swService = interpret(fetchMachine)
 swService.send('FETCH');
 ```
 
+## Finite State Machines
+
+```js
+import * as x from 'xsfp';
+
+const lightMachine = x.createMachine(
+  x.id('light'),
+  x.states(
+    x.state('green', x.on('TIMER', 'yellow')),
+    x.state('yellow', x.on('TIMER', 'red')),
+    x.state('red', x.on('TIMER', 'green'))
+  )
+);
+
+const currentState = 'green';
+
+const nextState = lightMachine.transition(currentState, 'TIMER').value;
+
+// => 'yellow'
+```
+
+## Hierarchical (Nested) State Machines
+
+```js
+import * as x from 'xsfp';
+
+const pedestrianStates = x.states(
+  x.state('walk', x.on('PED_TIMER', 'wait')),
+  x.state('wait', x.on('PED_TIMER', 'stop')),
+  x.state('stop')
+);
+
+const lightMachine = x.createMachine(
+  x.id('light'),
+  x.state('green', x.on('TIMER', 'yellow')),
+  x.state('yellow', x.on('TIMER', 'red')),
+  x.state('red', x.on('TIMER', 'green'), pedestrianStates)
+);
+
+const currentState = 'yellow';
+
+const nextState = lightMachine.transition(currentState, 'TIMER').value;
+// => {
+//   red: 'walk'
+// }
+
+lightMachine.transition('red.walk', 'PED_TIMER').value;
+// => {
+//   red: 'wait'
+// }
+```
+
+## Parallel State Machines
+
+```js
+const toggleStates = (toggleEvent: string) =>
+  x.states(
+    x.state('on', x.on(toggleEvent, 'off')),
+    x.state('off', x.on(toggleEvent, 'on'))
+  );
+
+const wordMachine = x.createMachine(
+  x.id('word'),
+  x.parallelStates(
+    x.state('bold', toggleStates('TOGGLE_BOLD')),
+    x.state('underline', toggleStates('TOGGLE_UNDERLINE')),
+    x.state('italics', toggleStates('TOGGLE_ITALICS')),
+    x.state(
+      'list',
+      x.states(
+        x.state('none', x.on('BULLETS', 'bullets'), x.on('NUMBERS', 'numbers')),
+        x.state('bullets', x.on('NONE', 'none'), x.on('NUMBERS', 'numbers')),
+        x.state('numbers', x.on('BULLETS', 'bullets'), x.on('NONE', 'none'))
+      )
+    )
+  )
+);
+
+const boldState = wordMachine.transition('bold.off', 'TOGGLE_BOLD').value;
+
+// {
+//   bold: 'on',
+//   italics: 'off',
+//   underline: 'off',
+//   list: 'none'
+// }
+
+const nextState = wordMachine.transition(
+  {
+    bold: 'off',
+    italics: 'off',
+    underline: 'on',
+    list: 'bullets',
+  },
+  'TOGGLE_ITALICS'
+).value;
+
+// {
+//   bold: 'off',
+//   italics: 'on',
+//   underline: 'on',
+//   list: 'bullets'
+// }
+```
+
+## History States
+
+```js
+const paymentMachine = x.createMachine(
+  x.id('payment'),
+  x.states(
+    x.state(
+      'method',
+      x.on('NEXT', 'review'),
+      x.state('cash', x.on('SWITCH_CHECK', 'check')),
+      x.state('check', x.on('SWITCH_CASH', 'cash')),
+      x.historyState('hist')
+    ),
+    x.state('review', x.on('PREVIOUS', 'method.hist'))
+  )
+);
+
+const checkState = paymentMachine.transition('method.cash', 'SWITCH_CHECK');
+
+// => State {
+//   value: { method: 'check' },
+//   history: State { ... }
+// }
+
+const reviewState = paymentMachine.transition(checkState, 'NEXT');
+
+// => State {
+//   value: 'review',
+//   history: State { ... }
+// }
+
+const previousState = paymentMachine.transition(reviewState, 'PREVIOUS').value;
+
+// => { method: 'check' }
+```
+
 ## Contribution
 
 Please feel free to make issues and PRs!
