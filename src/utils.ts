@@ -152,7 +152,7 @@ export function extractTransitions<
 
       if (type === 'actions') {
         const actions = currentTransition.actions
-          ? ([...currentTransition.actions, config] as xstate.Action<
+          ? ([...currentTransition.actions as xstate.TransitionConfig<TContext, TEvent>[], config] as xstate.Action<
               TContext,
               TEvent
             >[])
