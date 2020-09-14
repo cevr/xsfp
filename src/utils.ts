@@ -1,5 +1,12 @@
-import type * as xstate from 'xstate'
-import type { StateNodeConfigOnDoneTuple, StateNodeConfigOnErrorTuple, StateNodeConfigOnTuple, StateNodeConfigTuple, StatesTuple, TransitionTuple } from './types';
+import * as xstate from 'xstate';
+import {
+  StateNodeConfigOnDoneTuple,
+  StateNodeConfigOnErrorTuple,
+  StateNodeConfigOnTuple,
+  StateNodeConfigTuple,
+  StatesTuple,
+  TransitionTuple,
+} from './types';
 
 export function last<T>(array: T[]): T {
   return array[array.length - 1];
@@ -152,10 +159,13 @@ export function extractTransitions<
 
       if (type === 'actions') {
         const actions = currentTransition.actions
-          ? ([...currentTransition.actions as xstate.TransitionConfig<TContext, TEvent>[], config] as xstate.Action<
-              TContext,
-              TEvent
-            >[])
+          ? ([
+              ...(currentTransition.actions as xstate.TransitionConfig<
+                TContext,
+                TEvent
+              >[]),
+              config,
+            ] as xstate.Action<TContext, TEvent>[])
           : ([config] as xstate.Action<TContext, TEvent>[]);
         currentTransition.actions = actions;
       }

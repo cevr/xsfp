@@ -171,11 +171,15 @@ export type StateNodeConfigTuple<
   | StateNodeConfigActivitiesTuple<TContext, TStateSchema, TEvent>
   | StateNodeConfigDelimiterTuple;
 
-export type TransitionTuple<TContext = any, TEvent extends xstate.EventObject = any> =
-  | ActionTuple<TContext, TEvent>
-  | ActionGuardTuple<TContext, TEvent>;
+export type TransitionTuple<
+  TContext = any,
+  TEvent extends xstate.EventObject = any
+> = ActionTuple<TContext, TEvent> | ActionGuardTuple<TContext, TEvent>;
 
-export type ActionTuple<TContext = any, TEvent extends xstate.EventObject = any> =
+export type ActionTuple<
+  TContext = any,
+  TEvent extends xstate.EventObject = any
+> =
   | BaseActionTuple<TContext, TEvent>
   | AssignActionTuple<TContext, TEvent>
   | EffectActionTuple<TContext, TEvent>
