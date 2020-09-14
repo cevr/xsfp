@@ -1,5 +1,5 @@
 import type * as xstate from 'xstate'
-import type { StateNodeConfigOnDoneTuple, StateNodeConfigOnTuple, StateNodeConfigTuple, StatesTuple, TransitionTuple } from './types';
+import type { StateNodeConfigOnDoneTuple, StateNodeConfigOnErrorTuple, StateNodeConfigOnTuple, StateNodeConfigTuple, StatesTuple, TransitionTuple } from './types';
 
 export function last<T>(array: T[]): T {
   return array[array.length - 1];
@@ -60,7 +60,7 @@ export function extractEvents<
   >[];
   const nextArgs = args.filter(([key]) => key !== 'on');
   if (events.length) {
-    const { done, ...reducedEvents } = events.reduce(
+    const { done, error, ...reducedEvents } = events.reduce(
       (events, [_key, event]) => ({ ...events, ...event }),
       {} as Record<string, xstate.TransitionConfig<TContext, TEvent>[]>
     );
@@ -72,7 +72,16 @@ export function extractEvents<
         TEvent
       >);
     }
-    nextArgs.push(['on', reducedEvents as any]);
+    if (error) {
+      nextArgs.push(['onError', error] as StateNodeConfigOnErrorTuple<
+        TContext,
+        TStateSchema,
+        TEvent
+      >);
+    }
+    if (Object.keys(reducedEvents).length > 0) {
+      nextArgs.push(['on', reducedEvents as any]);
+    }
   }
 
   return nextArgs;
