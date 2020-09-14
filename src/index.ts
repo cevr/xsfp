@@ -221,7 +221,11 @@ export function always<
   TStateSchema extends xstate.StateSchema<any> = any,
   TEvent extends xstate.EventObject = any
 >(
-  ...args: types.TransitionTuple<TContext, TEvent>[]
+  ...args: (
+    | string
+    | xstate.TransitionConfig<TContext, TEvent>
+    | types.TransitionTuple<TContext, TEvent>
+  )[]
 ): types.StateNodeConfigAlwaysTuple<TContext, TStateSchema, TEvent> {
   return ['always', utils.extractTransitions<TContext, TEvent>(args)];
 }
