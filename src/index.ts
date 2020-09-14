@@ -36,7 +36,7 @@ export function states<
   return [['states', states], initialTuple];
 }
 
-export function parallel<
+export function parallelStates<
   TContext = any,
   TStateSchema extends xstate.StateSchema<any> = any,
   TEvent extends xstate.EventObject = any
@@ -55,7 +55,7 @@ export function parallel<
   ];
 }
 
-export function initial<
+export function initialState<
   TContext = any,
   TStateSchema extends xstate.StateSchema<any> = any,
   TEvent extends xstate.EventObject = any
@@ -96,9 +96,10 @@ export function state<
   ];
 }
 
-export function final<TContext = any, TEvent extends xstate.EventObject = any>(
-  stateName: string
-): [string, xstate.FinalStateNodeConfig<TContext, TEvent>] {
+export function finalState<
+  TContext = any,
+  TEvent extends xstate.EventObject = any
+>(stateName: string): [string, xstate.FinalStateNodeConfig<TContext, TEvent>] {
   return [stateName, { type: 'final' }];
 }
 

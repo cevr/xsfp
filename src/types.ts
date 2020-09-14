@@ -1,24 +1,27 @@
-import type * as xstate from 'xstate'
+import * as xstate from 'xstate';
 
-type StateNodeConfig<
+export type StateNodeConfig<
   TContext = any,
   TStateSchema extends xstate.StateSchema<any> = any,
   TEvent extends xstate.EventObject = any
-> = xstate.StateNodeConfig<
-  TContext,
-  TStateSchema['states'][keyof TStateSchema['states']],
-  TEvent
-> & {
+> = (
+  | xstate.StateNodeConfig<
+      TContext,
+      TStateSchema['states'][keyof TStateSchema['states']],
+      TEvent
+    >
+  | xstate.HistoryStateNodeConfig<TContext, TEvent>
+) & {
   isInitial?: boolean;
 };
 
-type StateTuple<
+export type StateTuple<
   TContext = any,
   TStateSchema extends xstate.StateSchema<any> = any,
   TEvent extends xstate.EventObject = any
 > = [string, StateNodeConfig<TContext, TStateSchema, TEvent>];
 
-type StatesTuple<
+export type StatesTuple<
   TContext = any,
   TStateSchema extends xstate.StateSchema<any> = any,
   TEvent extends xstate.EventObject = any
@@ -30,7 +33,7 @@ type StatesTuple<
   )
 ];
 
-type StateNodeConfigInitialTuple<
+export type StateNodeConfigInitialTuple<
   TContext = any,
   TStateSchema extends xstate.StateSchema<any> = any,
   TEvent extends xstate.EventObject = any
@@ -38,13 +41,13 @@ type StateNodeConfigInitialTuple<
   'initial',
   xstate.StateNodeConfig<TContext, TStateSchema, TEvent>['initial']
 ];
-
-type StateNodeConfigTypeTuple<
+export type StateNodeConfigDelimiterTuple = ['delimiter', string];
+export type StateNodeConfigTypeTuple<
   TContext = any,
   TStateSchema extends xstate.StateSchema<any> = any,
   TEvent extends xstate.EventObject = any
 > = ['type', xstate.StateNodeConfig<TContext, TStateSchema, TEvent>['type']];
-type StateNodeConfigContextTuple<
+export type StateNodeConfigContextTuple<
   TContext = any,
   TStateSchema extends xstate.StateSchema<any> = any,
   TEvent extends xstate.EventObject = any
@@ -52,7 +55,7 @@ type StateNodeConfigContextTuple<
   'context',
   xstate.StateNodeConfig<TContext, TStateSchema, TEvent>['context']
 ];
-type StateNodeConfigHistoryTuple<
+export type StateNodeConfigHistoryTuple<
   TContext = any,
   TStateSchema extends xstate.StateSchema<any> = any,
   TEvent extends xstate.EventObject = any
@@ -60,7 +63,7 @@ type StateNodeConfigHistoryTuple<
   'history',
   xstate.StateNodeConfig<TContext, TStateSchema, TEvent>['history']
 ];
-type StateNodeConfigStatesTuple<
+export type StateNodeConfigStatesTuple<
   TContext = any,
   TStateSchema extends xstate.StateSchema<any> = any,
   TEvent extends xstate.EventObject = any
@@ -69,7 +72,7 @@ type StateNodeConfigStatesTuple<
   xstate.StateNodeConfig<TContext, TStateSchema, TEvent>['states']
 ];
 
-type StateNodeConfigInvokeTuple<
+export type StateNodeConfigInvokeTuple<
   TContext = any,
   TStateSchema extends xstate.StateSchema<any> = any,
   TEvent extends xstate.EventObject = any
@@ -77,22 +80,22 @@ type StateNodeConfigInvokeTuple<
   'invoke',
   xstate.StateNodeConfig<TContext, TStateSchema, TEvent>['invoke']
 ];
-type StateNodeConfigOnTuple<
+export type StateNodeConfigOnTuple<
   TContext = any,
   TStateSchema extends xstate.StateSchema<any> = any,
   TEvent extends xstate.EventObject = any
 > = ['on', xstate.StateNodeConfig<TContext, TStateSchema, TEvent>['on']];
-type StateNodeConfigEntryTuple<
+export type StateNodeConfigEntryTuple<
   TContext = any,
   TStateSchema extends xstate.StateSchema<any> = any,
   TEvent extends xstate.EventObject = any
 > = ['entry', xstate.StateNodeConfig<TContext, TStateSchema, TEvent>['entry']];
-type StateNodeConfigExitTuple<
+export type StateNodeConfigExitTuple<
   TContext = any,
   TStateSchema extends xstate.StateSchema<any> = any,
   TEvent extends xstate.EventObject = any
 > = ['exit', xstate.StateNodeConfig<TContext, TStateSchema, TEvent>['exit']];
-type StateNodeConfigOnDoneTuple<
+export type StateNodeConfigOnDoneTuple<
   TContext = any,
   TStateSchema extends xstate.StateSchema<any> = any,
   TEvent extends xstate.EventObject = any
@@ -100,12 +103,20 @@ type StateNodeConfigOnDoneTuple<
   'onDone',
   xstate.StateNodeConfig<TContext, TStateSchema, TEvent>['onDone']
 ];
-type StateNodeConfigAfterTuple<
+export type StateNodeConfigOnErrorTuple<
+  TContext = any,
+  TStateSchema extends xstate.StateSchema<any> = any,
+  TEvent extends xstate.EventObject = any
+> = [
+  'onError',
+  xstate.StateNodeConfig<TContext, TStateSchema, TEvent>['onDone']
+];
+export type StateNodeConfigAfterTuple<
   TContext = any,
   TStateSchema extends xstate.StateSchema<any> = any,
   TEvent extends xstate.EventObject = any
 > = ['after', xstate.StateNodeConfig<TContext, TStateSchema, TEvent>['after']];
-type StateNodeConfigAlwaysTuple<
+export type StateNodeConfigAlwaysTuple<
   TContext = any,
   TStateSchema extends xstate.StateSchema<any> = any,
   TEvent extends xstate.EventObject = any
@@ -113,7 +124,7 @@ type StateNodeConfigAlwaysTuple<
   'always',
   xstate.StateNodeConfig<TContext, TStateSchema, TEvent>['always']
 ];
-type StateNodeConfigActivitiesTuple<
+export type StateNodeConfigActivitiesTuple<
   TContext = any,
   TStateSchema extends xstate.StateSchema<any> = any,
   TEvent extends xstate.EventObject = any
@@ -121,22 +132,22 @@ type StateNodeConfigActivitiesTuple<
   'activities',
   xstate.StateNodeConfig<TContext, TStateSchema, TEvent>['activities']
 ];
-type StateNodeConfigMetaTuple<
+export type StateNodeConfigMetaTuple<
   TContext = any,
   TStateSchema extends xstate.StateSchema<any> = any,
   TEvent extends xstate.EventObject = any
 > = ['meta', xstate.StateNodeConfig<TContext, TStateSchema, TEvent>['meta']];
-type StateNodeConfigDataTuple<
+export type StateNodeConfigDataTuple<
   TContext = any,
   TStateSchema extends xstate.StateSchema<any> = any,
   TEvent extends xstate.EventObject = any
 > = ['data', xstate.StateNodeConfig<TContext, TStateSchema, TEvent>['data']];
-type StateNodeConfigIdTuple<
+export type StateNodeConfigIdTuple<
   TContext = any,
   TStateSchema extends xstate.StateSchema<any> = any,
   TEvent extends xstate.EventObject = any
 > = ['id', xstate.StateNodeConfig<TContext, TStateSchema, TEvent>['id']];
-type StateNodeConfigTuple<
+export type StateNodeConfigTuple<
   TContext = any,
   TStateSchema extends xstate.StateSchema<any> = any,
   TEvent extends xstate.EventObject = any
@@ -151,18 +162,20 @@ type StateNodeConfigTuple<
   | StateNodeConfigEntryTuple<TContext, TStateSchema, TEvent>
   | StateNodeConfigExitTuple<TContext, TStateSchema, TEvent>
   | StateNodeConfigOnDoneTuple<TContext, TStateSchema, TEvent>
+  | StateNodeConfigOnErrorTuple<TContext, TStateSchema, TEvent>
   | StateNodeConfigAfterTuple<TContext, TStateSchema, TEvent>
   | StateNodeConfigAlwaysTuple<TContext, TStateSchema, TEvent>
   | StateNodeConfigMetaTuple<TContext, TStateSchema, TEvent>
   | StateNodeConfigDataTuple<TContext, TStateSchema, TEvent>
   | StateNodeConfigIdTuple<TContext, TStateSchema, TEvent>
-  | StateNodeConfigActivitiesTuple<TContext, TStateSchema, TEvent>;
+  | StateNodeConfigActivitiesTuple<TContext, TStateSchema, TEvent>
+  | StateNodeConfigDelimiterTuple;
 
-type TransitionTuple<TContext = any, TEvent extends xstate.EventObject = any> =
+export type TransitionTuple<TContext = any, TEvent extends xstate.EventObject = any> =
   | ActionTuple<TContext, TEvent>
   | ActionGuardTuple<TContext, TEvent>;
 
-type ActionTuple<TContext = any, TEvent extends xstate.EventObject = any> =
+export type ActionTuple<TContext = any, TEvent extends xstate.EventObject = any> =
   | BaseActionTuple<TContext, TEvent>
   | AssignActionTuple<TContext, TEvent>
   | EffectActionTuple<TContext, TEvent>
@@ -170,7 +183,7 @@ type ActionTuple<TContext = any, TEvent extends xstate.EventObject = any> =
   | ComposedActionTuple<TContext, TEvent>
   | KeyActionTuple;
 
-type ActionFunctionWithCleanup<
+export type ActionFunctionWithCleanup<
   TContext = any,
   TEvent extends xstate.EventObject = any
 > = (
@@ -179,19 +192,19 @@ type ActionFunctionWithCleanup<
   meta: xstate.ActionMeta<TContext, TEvent>
 ) => xstate.DisposeActivityFunction | void;
 
-type KeyActionTuple = ['actions', string];
+export type KeyActionTuple = ['actions', string];
 
-type ComposedActionTuple<
+export type ComposedActionTuple<
   TContext = any,
   TEvent extends xstate.EventObject = any
 > = ['actions', xstate.Action<TContext, TEvent>[]];
 
-type BaseActionTuple<
+export type BaseActionTuple<
   TContext = any,
   TEvent extends xstate.EventObject = any
 > = ['actions', xstate.Action<TContext, TEvent>];
 
-type EffectActionTuple<
+export type EffectActionTuple<
   TContext = any,
   TEvent extends xstate.EventObject = any
 > = [
@@ -202,26 +215,28 @@ type EffectActionTuple<
   )
 ];
 
-type AssignActionTuple<
+export type AssignActionTuple<
   TContext = any,
   TEvent extends xstate.EventObject = any
 > = ['actions', xstate.AssignAction<TContext, TEvent>];
 
-type ActionGuardTuple<
+export type ActionGuardTuple<
   TContext = any,
   TEvent extends xstate.EventObject = any
 > = ['cond', xstate.Condition<TContext, TEvent>];
 
-type ChooseActionTuple<
+export type ChooseActionTuple<
   TContext = any,
   TEvent extends xstate.EventObject = any
 > = ['actions', xstate.ChooseAction<TContext, TEvent>];
 
-type Delay<TContext = any, TEvent extends xstate.EventObject = any> =
+export type Delay<TContext = any, TEvent extends xstate.EventObject = any> =
   | number
   | ((context: TContext, event: TEvent) => number);
 
-type DelayedTransitionTuple<
+export type DelayedTransitionTuple<
   TContext = any,
   TEvent extends xstate.EventObject = any
 > = [Delay<TContext, TEvent>, xstate.TransitionConfig<TContext, TEvent>[]];
+
+export type AutoForwardTuple = ['autoForward', true];
