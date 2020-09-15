@@ -7,6 +7,7 @@ An API to use [xstate](https://xstate.js.org/docs/) in a composable way!
 ```bash
 yarn add xstate xsfp
 ```
+
 ```bash
 npm install xstate xsfp
 ```
@@ -77,9 +78,8 @@ const fetchMachine = x.createMachine(
         (context, event) =>
           fetch('https://swapi.dev/api/people/1').then(res => res.data),
         x.id('fetchLuke'),
-        // 'done' and 'error' are reserved events
-        x.on('done', 'resolved', x.assign({ user: (_, event) => event.data })),
-        x.on('error', 'rejected')
+        x.onDone('resolved', x.assign({ user: (_, event) => event.data })),
+        x.onError('rejected')
       ),
       x.on('CANCEL', 'idle')
     ),
@@ -539,18 +539,15 @@ function delay<TContext, TEvent>(
 
 ### invoke
 
-`invoke` accepts the `src` type as the first argument, and `on` | `id` | `data` | `autoForward`
-
-`'done'` and `'error'` events are reserved for the respective `onDone` and `onError` configs
+`invoke` accepts the `src` type as the first argument, and `onDone` | `onError` | `id` | `data` | `autoForward`
 
 ```js
 x.invoke(
   (context, event) =>
     fetch('https://swapi.dev/api/people/1').then(res => res.data),
   x.id('fetchLuke'),
-  // 'done' and 'error' are reserved events
-  x.on('done', 'resolved', x.assign({ user: (_, event) => event.data })),
-  x.on('error', 'rejected')
+  x.onDone('resolved', x.assign({ user: (_, event) => event.data })),
+  x.onError('rejected')
 );
 ```
 

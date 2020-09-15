@@ -103,14 +103,10 @@ export type StateNodeConfigOnDoneTuple<
   'onDone',
   xstate.StateNodeConfig<TContext, TStateSchema, TEvent>['onDone']
 ];
-export type StateNodeConfigOnErrorTuple<
+export type OnErrorTuple<
   TContext = any,
-  TStateSchema extends xstate.StateSchema<any> = any,
-  TEvent extends xstate.EventObject = any
-> = [
-  'onError',
-  xstate.StateNodeConfig<TContext, TStateSchema, TEvent>['onDone']
-];
+  TEvent extends xstate.DoneInvokeEvent<any> = any
+> = ['onError', xstate.InvokeConfig<TContext, TEvent>['onError']];
 export type StateNodeConfigAfterTuple<
   TContext = any,
   TStateSchema extends xstate.StateSchema<any> = any,
@@ -162,7 +158,6 @@ export type StateNodeConfigTuple<
   | StateNodeConfigEntryTuple<TContext, TStateSchema, TEvent>
   | StateNodeConfigExitTuple<TContext, TStateSchema, TEvent>
   | StateNodeConfigOnDoneTuple<TContext, TStateSchema, TEvent>
-  | StateNodeConfigOnErrorTuple<TContext, TStateSchema, TEvent>
   | StateNodeConfigAfterTuple<TContext, TStateSchema, TEvent>
   | StateNodeConfigAlwaysTuple<TContext, TStateSchema, TEvent>
   | StateNodeConfigMetaTuple<TContext, TStateSchema, TEvent>

@@ -1,67 +1,73 @@
 import { Machine } from 'xstate';
 import * as x from '../src';
-import * as utils from '../src/utils';
 
 describe('xsfp', () => {
-  it('creates valid xstate machine configs', () => {
-    const config = {
+  it('creates valid and equivalent xstate machines', () => {
+    const normalMachine = Machine({
       id: 'toggle',
       initial: 'inactive',
+      activities: ['activity'],
       states: {
         inactive: { on: { TOGGLE: [{ target: 'active' }] } },
-        active: { on: { TOGGLE: [{ target: 'inactive' }] } },
-      },
-    };
-    const machineConfig = [
-      x.id('toggle'),
-      x.states(
-        x.state('inactive', x.on('TOGGLE', 'active')),
-        x.state('active', x.on('TOGGLE', 'inactive'))
-      ),
-    ];
-    const xsfpConfig = utils.extractConfig(machineConfig);
-    expect(xsfpConfig).toEqual(config);
-    expect(JSON.stringify(Machine(xsfpConfig).toJSON())).toBe(
-      JSON.stringify(Machine(config).toJSON())
-    );
-  });
-
-  it('maps reserved events', () => {
-    const config = {
-      id: 'toggle',
-      initial: 'inactive',
-      states: {
         active: {
-          invoke: {
-            src: 'promise',
-            onDone: [{ target: 'inactive' }],
-            onError: [{ target: 'inactive' }],
+          type: 'parallel',
+          on: {
+            TOGGLE: [
+              {
+                target: 'inactive',
+                actions: [
+                  {
+                    type: 'xstate.assign',
+                    assignment: { test: 'test' },
+                  },
+                  {
+                    type: 'function () { }',
+                  },
+                ],
+              },
+            ],
+          },
+          entry: [{ type: 'test' }],
+          exit: [{ type: 'test' }],
+          always: [{ target: 'inactive' }],
+          states: {
+            parallel1: {},
+            parallel2: {},
           },
         },
-        inactive: {},
+        hist: {
+          type: 'history',
+          history: 'shallow',
+        },
+        final: {
+          type: 'final',
+        },
       },
-    };
-
-    const machineConfig = [
+    });
+    const xsfpMachine = x.createMachine(
       x.id('toggle'),
+      x.activities('activity'),
       x.states(
+        x.initialState('inactive', x.on('TOGGLE', 'active')),
         x.state(
           'active',
-          x.invoke(
-            'promise',
-            x.on('done', 'inactive'),
-            x.on('error', 'inactive')
-          )
+          x.on(
+            'TOGGLE',
+            'inactive',
+            x.assign({ test: 'test' }),
+            x.effect(() => {})
+          ),
+          x.entry(x.action('test')),
+          x.exit(x.action('test')),
+          x.always('inactive'),
+          x.parallelStates(x.state('parallel1'), x.state('parallel2'))
         ),
-        x.initialState('inactive')
-      ),
-    ];
-
-    const xsfpConfig = utils.extractConfig(machineConfig);
-
-    expect(xsfpConfig).toEqual(config);
-    expect(JSON.stringify(Machine(xsfpConfig).toJSON())).toBe(
-      JSON.stringify(Machine(config).toJSON())
+        x.historyState('hist'),
+        x.finalState('final')
+      )
+    );
+    expect(JSON.stringify(xsfpMachine.toJSON())).toEqual(
+      JSON.stringify(normalMachine.toJSON())
     );
   });
 });

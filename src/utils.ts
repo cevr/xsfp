@@ -1,7 +1,5 @@
 import * as xstate from 'xstate';
 import {
-  StateNodeConfigOnDoneTuple,
-  StateNodeConfigOnErrorTuple,
   StateNodeConfigOnTuple,
   StateNodeConfigTuple,
   StatesTuple,
@@ -66,29 +64,13 @@ export function extractEvents<
     TEvent
   >[];
   const nextArgs = args.filter(([key]) => key !== 'on');
-  if (events.length) {
-    const { done, error, ...reducedEvents } = events.reduce(
-      (events, [_key, event]) => ({ ...events, ...event }),
-      {} as Record<string, xstate.TransitionConfig<TContext, TEvent>[]>
-    );
-    if (done) {
-      // we destructure done because it's a reserved event
-      nextArgs.push(['onDone', done] as StateNodeConfigOnDoneTuple<
-        TContext,
-        TStateSchema,
-        TEvent
-      >);
-    }
-    if (error) {
-      nextArgs.push(['onError', error] as StateNodeConfigOnErrorTuple<
-        TContext,
-        TStateSchema,
-        TEvent
-      >);
-    }
-    if (Object.keys(reducedEvents).length > 0) {
-      nextArgs.push(['on', reducedEvents as any]);
-    }
+  const eventObject = events.reduce(
+    (events, [_key, event]) => ({ ...events, ...event }),
+    {} as Record<string, xstate.TransitionConfig<TContext, TEvent>[]>
+  );
+
+  if (Object.keys(eventObject).length > 0) {
+    nextArgs.push(['on', eventObject as any]);
   }
 
   return nextArgs;

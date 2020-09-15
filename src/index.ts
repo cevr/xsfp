@@ -134,6 +134,44 @@ export function on<
   return ['on', Object.fromEntries([eventTuple])];
 }
 
+export function onDone<
+  TContext = any,
+  TStateSchema extends xstate.StateSchema<any> = any,
+  TEvent extends xstate.EventObject = any
+>(
+  ...args: (
+    | string
+    | xstate.TransitionConfig<TContext, TEvent>
+    | types.TransitionTuple<TContext, TEvent>
+  )[]
+): types.StateNodeConfigOnDoneTuple<TContext, TStateSchema, TEvent> {
+  return [
+    'onDone',
+    utils.extractTransitions<TContext, TEvent>(args) as xstate.TransitionConfig<
+      TContext,
+      xstate.DoneEventObject
+    >,
+  ];
+}
+
+export function onError<
+  TContext = any,
+  TEvent extends xstate.EventObject = any
+>(
+  ...args: (
+    | string
+    | xstate.TransitionConfig<TContext, TEvent>
+    | types.TransitionTuple<TContext, TEvent>
+  )[]
+): types.OnErrorTuple<TContext, xstate.DoneInvokeEvent<any>> {
+  return [
+    'onError',
+    utils.extractTransitions<TContext, xstate.DoneInvokeEvent<any>>(
+      args as any
+    ),
+  ];
+}
+
 export function assign<TContext = any, TEvent extends xstate.EventObject = any>(
   assignment:
     | xstate.Assigner<TContext, TEvent>
@@ -204,16 +242,14 @@ export function invoke<
 >(
   src: xstate.InvokeConfig<TContext, TEvent>['src'],
   ...args: (
-    | types.StateNodeConfigOnTuple<TContext, TStateSchema, TEvent>
     | types.StateNodeConfigIdTuple<TContext, TStateSchema, TEvent>
     | types.StateNodeConfigDataTuple<TContext, TStateSchema, TEvent>
+    | types.StateNodeConfigOnDoneTuple<TContext, TStateSchema, TEvent>
+    | types.OnErrorTuple<TContext, xstate.DoneInvokeEvent<any>>
     | types.AutoForwardTuple
   )[]
 ): types.StateNodeConfigInvokeTuple<TContext, TStateSchema, TEvent> {
-  return [
-    'invoke',
-    { src, ...Object.fromEntries(utils.extractEvents(args as any)) },
-  ];
+  return ['invoke', { src, ...Object.fromEntries(args) }];
 }
 
 export function always<
