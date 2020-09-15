@@ -424,7 +424,7 @@ activities(effect((context) => {
     // ...
   }, context.timeout)
   return () = {
-    clearInterval(interalId)
+    clearInterval(intervalId)
   }
 }))
 ```
@@ -489,7 +489,7 @@ x.choose(
 
 `choice` accepts the same arguments as `transition` (except for a target state).
 Useful for explicitly setting boundaries
-(analagous to `transition` within `on`)
+(analogous to `transition` within `on`)
 
 ```js
 x.choose(
