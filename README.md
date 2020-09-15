@@ -26,15 +26,19 @@ import * as x from 'xsfp';
 // });
 
 // xsfp way
+const toggleEvent = targetName => x.on('TOGGLE', targetName);
+const toggleState = (stateName, targetName) =>
+  x.state(stateName, toggleEvent(targetName));
+
 const toggleMachine = x.createMachine(
   x.id('toggle'),
   x.states(
     // first state is implicitly the initial state
-    // can also be explicit with x.initialState('inactive', ...)
     x.state('inactive', x.on('TOGGLE', 'active')),
-    // can also explcitly make transitions
-    // provides clarity for single events with multiple transitions
-    x.state('active', x.on('TOGGLE', x.transition('inactive')))
+    x.state('active', x.on('TOGGLE', 'inactive')),
+    // composed! both are equivalent
+    toggleState('inactive', 'active'),
+    toggleState('active', 'inactive')
   )
 );
 
@@ -91,12 +95,16 @@ swService.send('FETCH');
 ```js
 import * as x from 'xsfp';
 
+const timerTransition = targetState => x.on('TIMER', targetState);
+const timerState = (stateName, targetState) =>
+  x.state(stateName, timerTransition(targetState));
+
 const lightMachine = x.createMachine(
   x.id('light'),
   x.states(
-    x.state('green', x.on('TIMER', 'yellow')),
-    x.state('yellow', x.on('TIMER', 'red')),
-    x.state('red', x.on('TIMER', 'green'))
+    timerState('green', 'yellow'),
+    timerState('yellow', 'red'),
+    timerState('red', 'green')
   )
 );
 
@@ -112,17 +120,21 @@ const nextState = lightMachine.transition(currentState, 'TIMER').value;
 ```js
 import * as x from 'xsfp';
 
+const pedTimerTransition = targetState => x.on('PED_TIEMR', targetState);
+
 const pedestrianStates = x.states(
-  x.state('walk', x.on('PED_TIMER', 'wait')),
-  x.state('wait', x.on('PED_TIMER', 'stop')),
+  x.state('walk', pedTimerTransition('wait')),
+  x.state('wait', pedTimerTransition('stop')),
   x.state('stop')
 );
 
+const timerTransition = targetState => x.on('TIMER', targetState);
+
 const lightMachine = x.createMachine(
   x.id('light'),
-  x.state('green', x.on('TIMER', 'yellow')),
-  x.state('yellow', x.on('TIMER', 'red')),
-  x.state('red', x.on('TIMER', 'green'), pedestrianStates)
+  x.state('green', timerTransition('yellow')),
+  x.state('yellow', timerTransition('red')),
+  x.state('red', timerTransition('green'), pedestrianStates)
 );
 
 const currentState = 'yellow';
