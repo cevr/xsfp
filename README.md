@@ -1,7 +1,12 @@
 An API to use [xstate](https://xstate.js.org/docs/) in a composable way!
 
+[View API](#API)
+
 ## Installation
 
+```bash
+yarn add xstate xsfp
+```
 ```bash
 npm install xstate xsfp
 ```
