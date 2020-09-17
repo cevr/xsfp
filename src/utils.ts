@@ -60,13 +60,12 @@ export function extractEvents<
 )[] {
   const events = args.filter(([key]) => key === 'on') as StateNodeConfigOnTuple<
     TContext,
-    TStateSchema,
     TEvent
   >[];
   const nextArgs = args.filter(([key]) => key !== 'on');
   const eventObject = events.reduce(
     (events, [_key, event]) => ({ ...events, ...event }),
-    {} as Record<string, xstate.TransitionConfig<TContext, TEvent>[]>
+    {} as xstate.TransitionConfig<TContext, TEvent>
   );
 
   if (Object.keys(eventObject).length > 0) {

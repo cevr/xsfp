@@ -67,11 +67,13 @@ toggleService.send('TOGGLE');
 import { interpret } from 'xstate';
 import * as x from 'xsfp';
 
+const fetchTransition = x.on('FETCH', 'loading');
+
 const fetchMachine = x.createMachine(
   x.id('SWAPI'),
   x.context({ user: null }),
   x.states(
-    x.initialState('idle', x.on('FETCH', 'loading')),
+    x.initialState('idle', fetchTransition),
     x.state(
       'loading',
       x.invoke(
@@ -83,7 +85,7 @@ const fetchMachine = x.createMachine(
       ),
       x.on('CANCEL', 'idle')
     ),
-    x.state('rejected', x.on('FETCH', 'loading')),
+    x.state('rejected', fetchTransition),
     x.finalState('resolved')
   )
 );
@@ -271,10 +273,9 @@ states(
 
 `state` | `initialState` is a function expects that all the same arguments as `createMachine`.
 
-`historyState` | `finalState` expect no arguments
-
-```js
+```ts
 state(
+  'name',
   states(),
   parallelStates(),
   id(),
@@ -290,6 +291,13 @@ state(
   meta(),
   data(),
   delimiter()
+);
+
+function finalState(stateName: string);
+function historyState(
+  stateName: string,
+  type?: 'shallow' | 'deep' = 'shallow',
+  target?: string
 );
 ```
 
@@ -573,4 +581,27 @@ function context<TContext>(context: TContext | () => TContext)
 
 ```ts
 function history(type: 'shallow' | 'deep' | 'none');
+```
+
+### merge
+
+`merge` accepts `on` OR `assign` | `action` | `effect` and merges them
+
+`merge` ignores the function assignment syntax because it has no way of calling it to merge with the other assignments
+
+```js
+const reset = merge(
+  assign({
+    value: '',
+  }),
+  assign({
+    open: false,
+  })
+  // ignores function assignment
+  assign((context) => ({
+    open: !context.open
+  }))
+);
+
+const resetTransitions = merge(on('reset', reset), on('cancel', reset));
 ```

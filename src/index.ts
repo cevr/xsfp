@@ -118,18 +118,14 @@ export function historyState<
   ];
 }
 
-export function on<
-  TContext = any,
-  TStateSchema extends xstate.StateSchema<any> = any,
-  TEvent extends xstate.EventObject = any
->(
+export function on<TContext = any, TEvent extends xstate.EventObject = any>(
   event: string,
   ...args: (
     | string
     | xstate.TransitionConfig<TContext, TEvent>
     | types.TransitionTuple<TContext, TEvent>
   )[]
-): types.StateNodeConfigOnTuple<TContext, TStateSchema, TEvent> {
+): types.StateNodeConfigOnTuple<TContext, TEvent> {
   const eventTuple = [event, utils.extractTransitions<TContext, TEvent>(args)];
   return ['on', Object.fromEntries([eventTuple])];
 }
@@ -225,7 +221,7 @@ export function transition<
     target: (args as any).find(
       (arg: string | types.TransitionTuple<TContext, TEvent>) =>
         typeof arg === 'string'
-    ) as string,
+    ) as string | undefined,
     actions: actions.length ? actions : undefined,
     cond,
   };
@@ -423,14 +419,50 @@ export function delimiter(
   return ['delimiter', delimiter];
 }
 
-export function composeActions<
-  TContext = any,
-  TEvent extends xstate.EventObject = any
->(
-  ...args: types.ActionTuple<TContext, TEvent>[]
-): types.ActionTuple<TContext, TEvent> {
-  const actions = utils.extractActions<TContext, TEvent>(args);
-  return ['actions', actions];
+export function merge<TContext = any, TEvent extends xstate.EventObject = any>(
+  ...args:
+    | types.ActionTuple<TContext, TEvent>[]
+    | types.StateNodeConfigOnTuple<TContext, TEvent>[]
+) {
+  const [[firstKey]] = args;
+  if (firstKey === 'on') {
+    return [
+      'on',
+      (args as types.StateNodeConfigOnTuple<TContext, TEvent>[]).reduce(
+        (events, [_key, event]) => ({ ...events, ...event }),
+        {} as xstate.TransitionConfig<TContext, TEvent>
+      ),
+    ];
+  }
+
+  const actions = utils.extractActions<TContext, TEvent>(
+    args as types.ActionTuple<TContext, TEvent>[]
+  );
+  const nonAssignActions = actions.filter(action => {
+    return !(
+      typeof action === 'object' && action.type === xstate.ActionTypes.Assign
+    );
+  });
+  const assignAction = (actions.filter(action => {
+    return (
+      typeof action === 'object' && action.type === xstate.ActionTypes.Assign
+    );
+  }) as xstate.AssignAction<TContext, TEvent>[]).reduce(
+    (mergedAssign, action) => {
+      if (typeof action.assignment === 'function') {
+        return mergedAssign;
+      }
+      return {
+        type: xstate.ActionTypes.Assign,
+        assignment: {
+          ...mergedAssign.assignment,
+          ...action.assignment,
+        },
+      };
+    },
+    {} as xstate.AssignAction<TContext, TEvent>
+  );
+  return ['actions', [assignAction, ...nonAssignActions]];
 }
 
 export function createMachine<

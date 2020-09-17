@@ -82,9 +82,8 @@ export type StateNodeConfigInvokeTuple<
 ];
 export type StateNodeConfigOnTuple<
   TContext = any,
-  TStateSchema extends xstate.StateSchema<any> = any,
   TEvent extends xstate.EventObject = any
-> = ['on', xstate.StateNodeConfig<TContext, TStateSchema, TEvent>['on']];
+> = ['on', xstate.TransitionsConfig<TContext, TEvent>];
 export type StateNodeConfigEntryTuple<
   TContext = any,
   TStateSchema extends xstate.StateSchema<any> = any,
@@ -154,7 +153,7 @@ export type StateNodeConfigTuple<
   | StateNodeConfigHistoryTuple<TContext, TStateSchema, TEvent>
   | StateNodeConfigStatesTuple<TContext, TStateSchema, TEvent>
   | StateNodeConfigInvokeTuple<TContext, TStateSchema, TEvent>
-  | StateNodeConfigOnTuple<TContext, TStateSchema, TEvent>
+  | StateNodeConfigOnTuple<TContext, TEvent>
   | StateNodeConfigEntryTuple<TContext, TStateSchema, TEvent>
   | StateNodeConfigExitTuple<TContext, TStateSchema, TEvent>
   | StateNodeConfigOnDoneTuple<TContext, TStateSchema, TEvent>
