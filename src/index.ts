@@ -10,9 +10,20 @@ export function states<
   TStateSchema extends xstate.StateSchema<any> = any,
   TEvent extends xstate.EventObject = any
 >(
-  ...args: types.StateTuple<TContext, TStateSchema, TEvent>[]
+  ...args: (types.StateTuple<TContext, TStateSchema, TEvent> | string)[]
 ): types.StatesTuple<TContext, TStateSchema, TEvent> {
-  const maybeInitialStateTuple = args.find(
+  const normalizedArgs: types.StateTuple<
+    TContext,
+    TStateSchema,
+    TEvent
+  >[] = args.map(maybeStateName => {
+    if (typeof maybeStateName === 'string') {
+      return [maybeStateName, {}];
+    }
+    return maybeStateName;
+  });
+
+  const maybeInitialStateTuple = normalizedArgs.find(
     ([_key, stateConfig]) => stateConfig.isInitial
   );
 
@@ -23,11 +34,11 @@ export function states<
     initialTuple = ['initial', stateName as keyof TStateSchema['states']];
     delete config.isInitial;
   } else {
-    const [[firstStateKey]] = args;
+    const [[firstStateKey]] = normalizedArgs;
     initialTuple = ['initial', firstStateKey as keyof TStateSchema['states']];
   }
 
-  const states = Object.fromEntries(args) as xstate.StatesConfig<
+  const states = Object.fromEntries(normalizedArgs) as xstate.StatesConfig<
     TContext,
     TStateSchema,
     TEvent
