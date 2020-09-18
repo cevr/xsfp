@@ -298,6 +298,24 @@ export function choice<TContext = any, TEvent extends xstate.EventObject = any>(
   };
 }
 
+export function pure<TContext = any, TEvent extends xstate.EventObject = any>(
+  create: (context: TContext, event: TEvent) => types.ActionTuple
+) {
+  return [
+    'actions',
+    xstate.actions.pure<TContext, TEvent>((context, event) => {
+      return utils.extractActions<TContext, TEvent>([create(context, event)]);
+    }),
+  ];
+}
+
+export function send<TContext = any, TEvent extends xstate.EventObject = any>(
+  event: string,
+  options: xstate.SendActionOptions<TContext, TEvent>
+): types.ActionTuple<TContext, TEvent> {
+  return ['actions', xstate.actions.send(event, options)];
+}
+
 export function id<
   TContext = any,
   TStateSchema extends xstate.StateSchema<any> = any,

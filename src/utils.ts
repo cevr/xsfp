@@ -4,6 +4,7 @@ import {
   StateNodeConfigTuple,
   StatesTuple,
   TransitionTuple,
+  ActionTuple,
 } from './types';
 
 export function last<T>(array: T[]): T {
@@ -80,13 +81,14 @@ export function extractActions<
   TEvent extends xstate.EventObject = any
 >(
   args:
+    | ActionTuple<TContext, TEvent>[]
     | TransitionTuple<TContext, TEvent>[]
     | (string | TransitionTuple<TContext, TEvent>)[]
 ) {
   return args
     .filter(([key]) => key === 'actions')
     .map(([_key, actions]) => actions)
-    .flat() as xstate.Action<TContext, TEvent>[];
+    .flat() as xstate.ActionObject<TContext, TEvent>[];
 }
 
 export function extractGuards<
