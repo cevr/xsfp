@@ -587,8 +587,6 @@ function history(type: 'shallow' | 'deep' | 'none');
 
 `merge` accepts `on` OR `assign` | `action` | `effect` and merges them
 
-`merge` ignores the function assignment syntax because it has no way of calling it to merge with the other assignments
-
 ```js
 const reset = merge(
   assign({

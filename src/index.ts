@@ -448,20 +448,21 @@ export function merge<TContext = any, TEvent extends xstate.EventObject = any>(
   const actions = utils.extractActions<TContext, TEvent>(
     args as types.ActionTuple<TContext, TEvent>[]
   );
-  const nonAssignActions = actions.filter(action => {
+  const otherActions = actions.filter(action => {
     return !(
-      typeof action === 'object' && action.type === xstate.ActionTypes.Assign
+      typeof action === 'object' &&
+      action.type === xstate.ActionTypes.Assign &&
+      typeof action.assignment !== 'function'
     );
   });
-  const assignAction = (actions.filter(action => {
+  const mergedAssign = (actions.filter(action => {
     return (
-      typeof action === 'object' && action.type === xstate.ActionTypes.Assign
+      typeof action === 'object' &&
+      action.type === xstate.ActionTypes.Assign &&
+      typeof action.assignment !== 'function'
     );
   }) as xstate.AssignAction<TContext, TEvent>[]).reduce(
     (mergedAssign, action) => {
-      if (typeof action.assignment === 'function') {
-        return mergedAssign;
-      }
       return {
         type: xstate.ActionTypes.Assign,
         assignment: {
@@ -472,7 +473,7 @@ export function merge<TContext = any, TEvent extends xstate.EventObject = any>(
     },
     {} as xstate.AssignAction<TContext, TEvent>
   );
-  return ['actions', [assignAction, ...nonAssignActions]];
+  return ['actions', [mergedAssign, ...otherActions]];
 }
 
 export function createMachine<
