@@ -299,8 +299,11 @@ export function choice<TContext = any, TEvent extends xstate.EventObject = any>(
 }
 
 export function pure<TContext = any, TEvent extends xstate.EventObject = any>(
-  create: (context: TContext, event: TEvent) => types.ActionTuple
-) {
+  create: (
+    context: TContext,
+    event: TEvent
+  ) => types.ActionTuple<TContext, TEvent>
+): types.ActionTuple<TContext, TEvent> {
   return [
     'actions',
     xstate.actions.pure<TContext, TEvent>((context, event) => {
