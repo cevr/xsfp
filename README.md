@@ -256,9 +256,17 @@ The API will not go into too much details, as the library expects the user to ha
 
 ### states | parallelStates
 
-`states` | `parallelStates` is a function that takes `state` | `initialState` | `finalState` | `historyState` as arguments.
+`states` takes `state` | `initialState` | `finalState` | `historyState` as arguments.
 
-The `initialState` function OR the first `state` function determines the initial state
+`parallelStates` takes `state` | `finalState` | `historyState` as arguments.
+
+`states` also accepts a string shorthand. Useful for nested states with no transitions
+
+```js
+states('clean', 'error', 'success');
+```
+
+The `initialState` function OR the first `state` argument determines the initial state
 
 ```js
 states(
