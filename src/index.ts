@@ -420,10 +420,20 @@ export function delimiter(
 }
 
 export function merge<TContext = any, TEvent extends xstate.EventObject = any>(
+  ...args: types.ActionTuple<TContext, TEvent>[]
+): types.ActionTuple<TContext, TEvent>;
+
+export function merge<TContext = any, TEvent extends xstate.EventObject = any>(
+  ...args: types.StateNodeConfigOnTuple<TContext, TEvent>[]
+): types.StateNodeConfigOnTuple<TContext, TEvent>;
+
+export function merge<TContext = any, TEvent extends xstate.EventObject = any>(
   ...args:
     | types.ActionTuple<TContext, TEvent>[]
     | types.StateNodeConfigOnTuple<TContext, TEvent>[]
-) {
+):
+  | types.ActionTuple<TContext, TEvent>
+  | types.StateNodeConfigOnTuple<TContext, TEvent> {
   const [[firstKey]] = args;
   if (firstKey === 'on') {
     return [
@@ -431,7 +441,7 @@ export function merge<TContext = any, TEvent extends xstate.EventObject = any>(
       (args as types.StateNodeConfigOnTuple<TContext, TEvent>[]).reduce(
         (events, [_key, event]) => ({ ...events, ...event }),
         {} as xstate.TransitionConfig<TContext, TEvent>
-      ),
+      ) as any,
     ];
   }
 
