@@ -314,7 +314,7 @@ export function pure<TContext = any, TEvent extends xstate.EventObject = any>(
     context: TContext,
     event: TEvent
   ) => types.ActionTuple<TContext, TEvent>
-): types.ActionTuple<TContext, TEvent> {
+): types.PureActionTuple<TContext, TEvent> {
   return [
     'actions',
     xstate.actions.pure<TContext, TEvent>((context, event) => {

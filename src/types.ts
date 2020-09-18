@@ -179,7 +179,13 @@ export type ActionTuple<
   | EffectActionTuple<TContext, TEvent>
   | ChooseActionTuple<TContext, TEvent>
   | ComposedActionTuple<TContext, TEvent>
+  | PureActionTuple<TContext, TEvent>
   | KeyActionTuple;
+
+export type PureActionTuple<
+  TContext = any,
+  TEvent extends xstate.EventObject = any
+> = ['actions', xstate.PureAction<TContext, TEvent>];
 
 export type ActionFunctionWithCleanup<
   TContext = any,
