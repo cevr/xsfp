@@ -310,10 +310,13 @@ export function pure<TContext = any, TEvent extends xstate.EventObject = any>(
 }
 
 export function send<TContext = any, TEvent extends xstate.EventObject = any>(
-  event: string | xstate.EventObject | xstate.ExprWithMeta<TContext, TEvent, xstate.EventObject>,
+  event:
+    | string
+    | TEvent
+    | xstate.ExprWithMeta<TContext, TEvent, xstate.EventObject>,
   options?: xstate.SendActionOptions<TContext, TEvent>
 ): types.ActionTuple<TContext, TEvent> {
-  return ['actions', xstate.actions.send(event, options)];
+  return ['actions', xstate.actions.send<TContext, TEvent>(event, options)];
 }
 
 export function id<
