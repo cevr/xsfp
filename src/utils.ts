@@ -13,16 +13,16 @@ export function last<T>(array: T[]): T {
 
 export function extractStates<
   TContext = any,
-  TStateSchema extends xstate.StateSchema<any> = any,
-  TEvent extends xstate.EventObject = any
+  TEvent extends xstate.EventObject = any,
+  TStateSchema extends xstate.StateSchema<any> = any
 >(
   args: (
-    | StateNodeConfigTuple<TContext, TStateSchema, TEvent>
-    | StatesTuple<TContext, TStateSchema, TEvent>
+    | StateNodeConfigTuple<TContext, TEvent, TStateSchema>
+    | StatesTuple<TContext, TEvent, TStateSchema>
   )[]
 ) {
   const states = args.find(([maybeArray]) => Array.isArray(maybeArray)) as
-    | StatesTuple<TContext, TStateSchema, TEvent>
+    | StatesTuple<TContext, TEvent, TStateSchema>
     | undefined;
 
   return [
@@ -33,12 +33,12 @@ export function extractStates<
 
 export function extractConfig<
   TContext = any,
-  TStateSchema extends xstate.StateSchema<any> = any,
-  TEvent extends xstate.EventObject = any
+  TEvent extends xstate.EventObject = any,
+  TStateSchema extends xstate.StateSchema<any> = any
 >(
   args: (
-    | StateNodeConfigTuple<TContext, TStateSchema, TEvent>
-    | StatesTuple<TContext, TStateSchema, TEvent>
+    | StateNodeConfigTuple<TContext, TEvent, TStateSchema>
+    | StatesTuple<TContext, TEvent, TStateSchema>
   )[]
 ): xstate.StateNodeConfig<TContext, TStateSchema, TEvent> {
   const nextArgs = extractEvents(extractStates(args));
@@ -48,16 +48,16 @@ export function extractConfig<
 
 export function extractEvents<
   TContext = any,
-  TStateSchema extends xstate.StateSchema<any> = any,
-  TEvent extends xstate.EventObject = any
+  TEvent extends xstate.EventObject = any,
+  TStateSchema extends xstate.StateSchema<any> = any
 >(
   args: (
-    | StateNodeConfigTuple<TContext, TStateSchema, TEvent>
-    | StatesTuple<TContext, TStateSchema, TEvent>
+    | StateNodeConfigTuple<TContext, TEvent, TStateSchema>
+    | StatesTuple<TContext, TEvent, TStateSchema>
   )[]
 ): (
-  | StateNodeConfigTuple<TContext, TStateSchema, TEvent>
-  | StatesTuple<TContext, TStateSchema, TEvent>
+  | StateNodeConfigTuple<TContext, TEvent, TStateSchema>
+  | StatesTuple<TContext, TEvent, TStateSchema>
 )[] {
   const events = args.filter(([key]) => key === 'on') as StateNodeConfigOnTuple<
     TContext,

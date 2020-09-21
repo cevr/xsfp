@@ -7,15 +7,15 @@ import * as utils from './utils';
 
 export function states<
   TContext = any,
-  TStateSchema extends xstate.StateSchema<any> = any,
-  TEvent extends xstate.EventObject = any
+  TEvent extends xstate.EventObject = any,
+  TStateSchema extends xstate.StateSchema<any> = any
 >(
-  ...args: (types.StateTuple<TContext, TStateSchema, TEvent> | string)[]
-): types.StatesTuple<TContext, TStateSchema, TEvent> {
+  ...args: (types.StateTuple<TContext, TEvent, TStateSchema> | string)[]
+): types.StatesTuple<TContext, TEvent, TStateSchema> {
   const normalizedArgs: types.StateTuple<
     TContext,
-    TStateSchema,
-    TEvent
+    TEvent,
+    TStateSchema
   >[] = args.map(maybeStateName => {
     if (typeof maybeStateName === 'string') {
       return [maybeStateName, {}];
@@ -49,11 +49,11 @@ export function states<
 
 export function parallelStates<
   TContext = any,
-  TStateSchema extends xstate.StateSchema<any> = any,
-  TEvent extends xstate.EventObject = any
+  TEvent extends xstate.EventObject = any,
+  TStateSchema extends xstate.StateSchema<any> = any
 >(
   ...args: [string, xstate.StateNodeConfig<TContext, TStateSchema, TEvent>][]
-): types.StatesTuple<TContext, TStateSchema, TEvent> {
+): types.StatesTuple<TContext, TEvent, TStateSchema> {
   const states = Object.fromEntries(args) as xstate.StatesConfig<
     TContext,
     TStateSchema,
@@ -68,16 +68,16 @@ export function parallelStates<
 
 export function initialState<
   TContext = any,
-  TStateSchema extends xstate.StateSchema<any> = any,
-  TEvent extends xstate.EventObject = any
+  TEvent extends xstate.EventObject = any,
+  TStateSchema extends xstate.StateSchema<any> = any
 >(
   stateName: string,
   ...args: (
-    | types.StateNodeConfigTuple<TContext, TStateSchema, TEvent>
-    | types.StatesTuple<TContext, TStateSchema, TEvent>
+    | types.StateNodeConfigTuple<TContext, TEvent, TStateSchema>
+    | types.StatesTuple<TContext, TEvent, TStateSchema>
   )[]
-): types.StateTuple<TContext, TStateSchema, TEvent> {
-  const [, stateConfig] = state<TContext, TStateSchema, TEvent>(
+): types.StateTuple<TContext, TEvent, TStateSchema> {
+  const [, stateConfig] = state<TContext, TEvent, TStateSchema>(
     stateName,
     ...args
   );
@@ -86,18 +86,18 @@ export function initialState<
 
 export function state<
   TContext = any,
-  TStateSchema extends xstate.StateSchema<any> = any,
-  TEvent extends xstate.EventObject = any
+  TEvent extends xstate.EventObject = any,
+  TStateSchema extends xstate.StateSchema<any> = any
 >(
   stateName: string,
   ...args: (
-    | types.StateNodeConfigTuple<TContext, TStateSchema, TEvent>
-    | types.StatesTuple<TContext, TStateSchema, TEvent>
+    | types.StateNodeConfigTuple<TContext, TEvent, TStateSchema>
+    | types.StatesTuple<TContext, TEvent, TStateSchema>
   )[]
-): types.StateTuple<TContext, TStateSchema, TEvent> {
+): types.StateTuple<TContext, TEvent, TStateSchema> {
   return [
     stateName,
-    utils.extractConfig<TContext, TStateSchema, TEvent>(
+    utils.extractConfig<TContext, TEvent, TStateSchema>(
       args
     ) as xstate.StateNodeConfig<
       TContext,
@@ -116,13 +116,13 @@ export function finalState<
 
 export function historyState<
   TContext = any,
-  TStateSchema extends xstate.StateSchema<any> = any,
-  TEvent extends xstate.EventObject = any
+  TEvent extends xstate.EventObject = any,
+  TStateSchema extends xstate.StateSchema<any> = any
 >(
   stateName: string,
   history?: 'shallow' | 'deep',
   target?: string
-): types.StateTuple<TContext, TStateSchema, TEvent> {
+): types.StateTuple<TContext, TEvent, TStateSchema> {
   return [
     stateName,
     { type: 'history', history: history ?? 'shallow', target },
@@ -143,40 +143,28 @@ export function on<TContext = any, TEvent extends xstate.EventObject = any>(
 
 export function onDone<
   TContext = any,
-  TStateSchema extends xstate.StateSchema<any> = any,
-  TEvent extends xstate.EventObject = any
+  TEvent extends xstate.DoneEventObject = any
 >(
   ...args: (
     | string
     | xstate.TransitionConfig<TContext, TEvent>
     | types.TransitionTuple<TContext, TEvent>
   )[]
-): types.StateNodeConfigOnDoneTuple<TContext, TStateSchema, TEvent> {
-  return [
-    'onDone',
-    utils.extractTransitions<TContext, TEvent>(args) as xstate.TransitionConfig<
-      TContext,
-      xstate.DoneEventObject
-    >,
-  ];
+): types.StateNodeConfigOnDoneTuple<TContext, TEvent> {
+  return ['onDone', utils.extractTransitions<TContext, TEvent>(args)];
 }
 
 export function onError<
   TContext = any,
-  TEvent extends xstate.EventObject = any
+  TEvent extends xstate.DoneInvokeEvent<any> = any
 >(
   ...args: (
     | string
     | xstate.TransitionConfig<TContext, TEvent>
     | types.TransitionTuple<TContext, TEvent>
   )[]
-): types.OnErrorTuple<TContext, xstate.DoneInvokeEvent<any>> {
-  return [
-    'onError',
-    utils.extractTransitions<TContext, xstate.DoneInvokeEvent<any>>(
-      args as any
-    ),
-  ];
+): types.OnErrorTuple<TContext, TEvent> {
+  return ['onError', utils.extractTransitions<TContext, TEvent>(args)];
 }
 
 export function assign<TContext = any, TEvent extends xstate.EventObject = any>(
@@ -242,34 +230,26 @@ export function autoForward() {
   return ['autoForward', true];
 }
 
-export function invoke<
-  TContext = any,
-  TStateSchema extends xstate.StateSchema<any> = any,
-  TEvent extends xstate.EventObject = any
->(
+export function invoke<TContext = any, TEvent extends xstate.EventObject = any>(
   src: xstate.InvokeConfig<TContext, TEvent>['src'],
   ...args: (
-    | types.StateNodeConfigIdTuple<TContext, TStateSchema, TEvent>
-    | types.StateNodeConfigDataTuple<TContext, TStateSchema, TEvent>
-    | types.StateNodeConfigOnDoneTuple<TContext, TStateSchema, TEvent>
+    | types.StateNodeConfigIdTuple
+    | types.StateNodeConfigDataTuple<TContext, TEvent>
+    | types.StateNodeConfigOnDoneTuple<TContext, TEvent>
     | types.OnErrorTuple<TContext, xstate.DoneInvokeEvent<any>>
     | types.AutoForwardTuple
   )[]
-): types.StateNodeConfigInvokeTuple<TContext, TStateSchema, TEvent> {
+): types.StateNodeConfigInvokeTuple<TContext, TEvent> {
   return ['invoke', { src, ...Object.fromEntries(args) }];
 }
 
-export function always<
-  TContext = any,
-  TStateSchema extends xstate.StateSchema<any> = any,
-  TEvent extends xstate.EventObject = any
->(
+export function always<TContext = any, TEvent extends xstate.EventObject = any>(
   ...args: (
     | string
     | xstate.TransitionConfig<TContext, TEvent>
     | types.TransitionTuple<TContext, TEvent>
   )[]
-): types.StateNodeConfigAlwaysTuple<TContext, TStateSchema, TEvent> {
+): types.StateNodeConfigAlwaysTuple<TContext, TEvent> {
   return ['always', utils.extractTransitions<TContext, TEvent>(args)];
 }
 
@@ -333,87 +313,58 @@ export function send<TContext = any, TEvent extends xstate.EventObject = any>(
   return ['actions', xstate.actions.send<TContext, TEvent>(event, options)];
 }
 
-export function id<
-  TContext = any,
-  TStateSchema extends xstate.StateSchema<any> = any,
-  TEvent extends xstate.EventObject = any
->(name: string): types.StateNodeConfigIdTuple<TContext, TStateSchema, TEvent> {
+export function id(name: string): types.StateNodeConfigIdTuple {
   return ['id', name];
 }
 
-export function entry<
-  TContext = any,
-  TStateSchema extends xstate.StateSchema<any> = any,
-  TEvent extends xstate.EventObject = any
->(
+export function entry<TContext = any, TEvent extends xstate.EventObject = any>(
   ...actions: types.BaseActionTuple<TContext, TEvent>[]
-): types.StateNodeConfigEntryTuple<TContext, TStateSchema, TEvent> {
+): types.StateNodeConfigEntryTuple<TContext, TEvent> {
   return ['entry', utils.extractActions<TContext, TEvent>(actions)];
 }
 
-export function exit<
-  TContext = any,
-  TStateSchema extends xstate.StateSchema<any> = any,
-  TEvent extends xstate.EventObject = any
->(
+export function exit<TContext = any, TEvent extends xstate.EventObject = any>(
   ...actions: types.BaseActionTuple<TContext, TEvent>[]
-): types.StateNodeConfigExitTuple<TContext, TStateSchema, TEvent> {
+): types.StateNodeConfigExitTuple<TContext, TEvent> {
   return ['exit', utils.extractActions<TContext, TEvent>(actions)];
 }
 
-export function meta<
-  TContext = any,
-  TStateSchema extends xstate.StateSchema<any> = any,
-  TEvent extends xstate.EventObject = any
->(
+export function meta<TStateSchema extends xstate.StateSchema<any> = any>(
   meta: TStateSchema extends {
     meta: infer D;
   }
     ? D
     : any
-): types.StateNodeConfigMetaTuple<TContext, TStateSchema, TEvent> {
+): types.StateNodeConfigMetaTuple<TStateSchema> {
   return ['meta', meta];
 }
 
-export function data<
-  TContext = any,
-  TStateSchema extends xstate.StateSchema<any> = any,
-  TEvent extends xstate.EventObject = any
->(
+export function data<TContext = any, TEvent extends xstate.EventObject = any>(
   data:
     | xstate.Mapper<TContext, TEvent, any>
     | xstate.PropertyMapper<TContext, TEvent, any>
-): types.StateNodeConfigDataTuple<TContext, TStateSchema, TEvent> {
+): types.StateNodeConfigDataTuple<TContext, TEvent> {
   return ['data', data];
 }
 
-export function history<
-  TContext = any,
-  TStateSchema extends xstate.StateSchema<any> = any,
-  TEvent extends xstate.EventObject = any
->(
+export function history(
   history: 'none' | 'shallow' | 'deep'
-): types.StateNodeConfigHistoryTuple<TContext, TStateSchema, TEvent> {
+): types.StateNodeConfigHistoryTuple {
   return ['history', history === 'none' ? false : history];
 }
 
-export function context<
-  TContext = any,
-  TStateSchema extends xstate.StateSchema<any> = any,
-  TEvent extends xstate.EventObject = any
->(
-  context: TContext | (() => TContext)
-): types.StateNodeConfigTuple<TContext, TStateSchema, TEvent> {
+export function context<TContext = any>(
+  context: Partial<TContext> | (() => Partial<TContext>)
+): types.StateNodeConfigContextTuple<TContext> {
   return ['context', context];
 }
 
 export function activities<
   TContext = any,
-  TStateSchema extends xstate.StateSchema<any> = any,
   TEvent extends xstate.EventObject = any
 >(
   ...args: (string | types.EffectActionTuple<TContext, TEvent>)[]
-): types.StateNodeConfigActivitiesTuple<TContext, TStateSchema, TEvent> {
+): types.StateNodeConfigActivitiesTuple<TContext, TEvent> {
   const activities: xstate.Activity<TContext, TEvent>[] = args.map(
     maybeEffect => {
       if (Array.isArray(maybeEffect)) {
@@ -513,14 +464,14 @@ export function merge<TContext = any, TEvent extends xstate.EventObject = any>(
 
 export function createMachine<
   TContext = any,
-  TStateSchema extends xstate.StateSchema<any> = any,
-  TEvent extends xstate.EventObject = any
+  TEvent extends xstate.EventObject = any,
+  TStateSchema extends xstate.StateSchema<any> = any
 >(
   ...args: (
-    | types.StateNodeConfigTuple<TContext, TStateSchema, TEvent>
-    | types.StatesTuple<TContext, TStateSchema, TEvent>
+    | types.StateNodeConfigTuple<TContext, TEvent, TStateSchema>
+    | types.StatesTuple<TContext, TEvent, TStateSchema>
   )[]
 ) {
-  const config = utils.extractConfig<TContext, TStateSchema, TEvent>(args);
+  const config = utils.extractConfig<TContext, TEvent, TStateSchema>(args);
   return Machine<TContext, TStateSchema, TEvent>(config);
 }
